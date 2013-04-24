@@ -11,8 +11,8 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
 public class Game implements ApplicationListener {
-	Texture dropImage;
-	Texture bucketImage;
+	Texture robot;
+	//Texture bucketImage;
 	
 	SpriteBatch batch;
 	OrthographicCamera camera;
@@ -21,8 +21,8 @@ public class Game implements ApplicationListener {
 	@Override
 	public void create() {
 		// load the images for the droplet and the bucket, 48x48 pixels each
-		dropImage = new Texture(Gdx.files.internal("ic_launcher.png"));
-		bucketImage = new Texture(Gdx.files.internal("ic_launcher.png"));
+		robot = new Texture(Gdx.files.internal("ic_launcher.png"));
+		//bucketImage = new Texture(Gdx.files.internal("ic_launcher.png"));
 
 		// create the camera and the SpriteBatch
 		camera = new OrthographicCamera();
@@ -59,7 +59,7 @@ public class Game implements ApplicationListener {
 		// begin a new batch and draw the bucket and
 		// all drops
 		batch.begin();
-		batch.draw(bucketImage, bucket.x, bucket.y);
+		batch.draw(robot, bucket.x, bucket.y);
 		batch.end();
 		
 		// process user input
@@ -87,8 +87,7 @@ public class Game implements ApplicationListener {
 	@Override
 	public void dispose() {
 		// dispose of all the native resources
-		dropImage.dispose();
-		bucketImage.dispose();
+		robot.dispose();
 		batch.dispose();
 	}
 
