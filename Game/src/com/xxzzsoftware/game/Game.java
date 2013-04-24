@@ -12,15 +12,18 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.TimeUtils;
 
 public class Game implements ApplicationListener {
 	
 	private final static String TAG = "Game";
 	private Texture robot;
+	private Texture bullet;
 	private Music background;
 	
 	private OrthographicCamera camera;
 	private SpriteBatch batch;
+	
 	private Rectangle rect;
 	
 	private int screenWidth = 0;
@@ -28,6 +31,12 @@ public class Game implements ApplicationListener {
 	
 	private int robotWidth = 0;;
 	private int robotHeight = 0;
+	
+	private int bulletWidth = 0;;
+	private int bulletHeight = 0;
+	
+	private boolean hasBullet = false;
+	private long sendTime = 0;
 
 	@Override
 	public void create() {
@@ -35,6 +44,10 @@ public class Game implements ApplicationListener {
 		robot = new Texture(Gdx.files.internal("ic_launcher.png"));
 		robotWidth = robot.getWidth();
 		robotHeight = robot.getHeight();
+		
+		bullet =  new Texture(Gdx.files.internal("ic_launcher.png"));
+		bulletWidth = bullet.getWidth();
+		bulletHeight = bullet.getHeight();
 		
 		// load the background "music"
 		background = Gdx.audio.newMusic(Gdx.files.internal("background.mp3"));
@@ -65,6 +78,28 @@ public class Game implements ApplicationListener {
 		rect.height = robotHeight;
 
 	}
+	
+	private void sendBullet(){
+		
+		// create a Rectangle to logically represent the robot
+		Rectangle bulletRect = new Rectangle();
+		// center the rectangle horizontally
+		bulletRect.x = rect.x;
+		// bottom left corner of the bucket is 20 pixels above the bottom screen edge
+		bulletRect.y = rect.y;
+				
+		Log.d(TAG, "Y = "+bulletRect.y);
+		bulletRect.width = bulletWidth;
+		bulletRect.height = bulletHeight;
+		
+		batch.draw(bullet, bulletRect.x, bulletRect.y);
+		
+		if(bulletRect.y >= screenHeight){
+			bulletRect.y = 20;
+			hasBullet = true;
+		}
+		
+	}
 
 
 	@Override
@@ -86,6 +121,9 @@ public class Game implements ApplicationListener {
 		// begin a new batch and draw the rectangle
 		batch.begin();
 		batch.draw(robot, rect.x, rect.y);
+		if(hasBullet){
+			sendBullet();
+		}
 		batch.end();
 		
 		// process user input
@@ -102,6 +140,13 @@ public class Game implements ApplicationListener {
 		if (Gdx.input.isKeyPressed(Keys.RIGHT)){ 
 			rect.x += 500 * Gdx.graphics.getDeltaTime();
 		}
+		if (Gdx.input.isKeyPressed(Keys.UP)) {
+			//rect.x = screenWidth / 2 - robotWidth / 2;
+			if(!hasBullet){
+				hasBullet = true;
+				sendTime = TimeUtils.nanoTime();
+			}
+		}
 		
 		// make sure the bucket stays within the screen bounds
 		if (rect.x < 0){
@@ -111,10 +156,8 @@ public class Game implements ApplicationListener {
 			rect.x = screenWidth - robotWidth;
 		}
 	    
-
 	}
 	
-
 	@Override
 	public void dispose() {
 		// dispose of all the native resources
