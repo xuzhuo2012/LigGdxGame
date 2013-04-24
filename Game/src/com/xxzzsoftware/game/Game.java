@@ -1,8 +1,11 @@
 package com.xxzzsoftware.game;
 
+import android.util.Log;
+
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -11,31 +14,55 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
 public class Game implements ApplicationListener {
-	Texture robot;
-	//Texture bucketImage;
 	
-	SpriteBatch batch;
-	OrthographicCamera camera;
-	Rectangle bucket;
+	private final static String TAG = "Game";
+	private Texture robot;
+	private Music background;
+	
+	private OrthographicCamera camera;
+	private SpriteBatch batch;
+	private Rectangle rect;
+	
+	private int screenWidth = 0;
+	private int screenHeight = 0;
+	
+	private int robotWidth = 0;;
+	private int robotHeight = 0;
 
 	@Override
 	public void create() {
 		// load the images for the droplet and the bucket, 48x48 pixels each
 		robot = new Texture(Gdx.files.internal("ic_launcher.png"));
-		//bucketImage = new Texture(Gdx.files.internal("ic_launcher.png"));
+		robotWidth = robot.getWidth();
+		robotHeight = robot.getHeight();
+		
+		// load the background "music"
+		background = Gdx.audio.newMusic(Gdx.files.internal("background.mp3"));
+		
+		// start the playback of the background music immediately
+		background.setLooping(true);
+		//background.play();
+	      
+		
+		screenWidth = Gdx.app.getGraphics().getWidth();
+		screenHeight = Gdx.app.getGraphics().getHeight();
+		
+		Log.d(TAG, "With = "+screenWidth);
+		Log.d(TAG, "Height"+screenHeight);
 
 		// create the camera and the SpriteBatch
 		camera = new OrthographicCamera();
-		camera.setToOrtho(false, 800, 600);
+		camera.setToOrtho(false, screenWidth, screenHeight);
 		batch = new SpriteBatch();
 
-		// create a Rectangle to logically represent the bucket
-		bucket = new Rectangle();
-		bucket.x = 800 / 2 - 600/ 2; // center the bucket horizontally
-		bucket.y = 20; // bottom left corner of the bucket is 20 pixels above
-						// the bottom screen edge
-		bucket.width = 72;
-		bucket.height = 72;
+		// create a Rectangle to logically represent the robot
+		rect = new Rectangle();
+		// center the rectangle horizontally
+		rect.x = screenWidth / 2 - robotWidth/2;
+		// bottom left corner of the bucket is 20 pixels above the bottom screen edge
+		rect.y = 20; 
+		rect.width = robotWidth;
+		rect.height = robotHeight;
 
 	}
 
@@ -56,10 +83,9 @@ public class Game implements ApplicationListener {
 		// coordinate system specified by the camera.
 		batch.setProjectionMatrix(camera.combined);
 
-		// begin a new batch and draw the bucket and
-		// all drops
+		// begin a new batch and draw the rectangle
 		batch.begin();
-		batch.draw(robot, bucket.x, bucket.y);
+		batch.draw(robot, rect.x, rect.y);
 		batch.end();
 		
 		// process user input
@@ -67,18 +93,23 @@ public class Game implements ApplicationListener {
 			Vector3 touchPos = new Vector3();
 			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 			camera.unproject(touchPos);
-			bucket.x = touchPos.x - 72 / 2;
+			rect.x = touchPos.x - robotWidth / 2;
 		}
-		if (Gdx.input.isKeyPressed(Keys.LEFT))
-			bucket.x -= 200 * Gdx.graphics.getDeltaTime();
-		if (Gdx.input.isKeyPressed(Keys.RIGHT)) 
-			bucket.x += 200 * Gdx.graphics.getDeltaTime();
+		
+		if (Gdx.input.isKeyPressed(Keys.LEFT)){
+			rect.x -= 500 * Gdx.graphics.getDeltaTime();
+		}
+		if (Gdx.input.isKeyPressed(Keys.RIGHT)){ 
+			rect.x += 500 * Gdx.graphics.getDeltaTime();
+		}
 		
 		// make sure the bucket stays within the screen bounds
-		if (bucket.x < 0)
-			bucket.x = 0;
-		if (bucket.x > 800 -72)
-			bucket.x = 800 - 72;
+		if (rect.x < 0){
+			rect.x = 0;
+		}
+		if (rect.x > screenWidth -robotWidth){
+			rect.x = screenWidth - robotWidth;
+		}
 	    
 
 	}
@@ -89,6 +120,7 @@ public class Game implements ApplicationListener {
 		// dispose of all the native resources
 		robot.dispose();
 		batch.dispose();
+		background.dispose();
 	}
 
 	@Override
